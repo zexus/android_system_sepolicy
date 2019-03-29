@@ -1,0 +1,30 @@
+# service flash_recovery in init.rc
+type install_security, domain, domain_deprecated;
+type install_security_exec, exec_type, file_type;
+
+init_daemon_domain(install_security)
+
+allow install_security self:capability dac_override;
+
+# /system/bin/install-recovery.sh is a shell script.
+# Needs to execute /system/bin/sh
+allow install_security shell_exec:file rx_file_perms;
+
+# Execute /system/bin/applypatch
+allow install_security system_file:file rx_file_perms;
+
+allow install_security toolbox_exec:file rx_file_perms;
+
+# Update the recovery block device based off a diff of the boot block device
+allow install_security block_device:dir search;
+allow install_security boot_block_device:blk_file r_file_perms;
+
+# Create and delete /cache/saved.file
+allow install_security { cache_file cache_recovery_file }:dir rw_dir_perms;
+allow install_security { cache_file cache_recovery_file }:file create_file_perms;
+
+auditallow install_security cache_recovery_file:dir rw_dir_perms;
+auditallow install_security cache_recovery_file:file create_file_perms;
+
+# Write to /proc/sys/vm/drop_caches
+allow install_security proc_drop_caches:file w_file_perms;
